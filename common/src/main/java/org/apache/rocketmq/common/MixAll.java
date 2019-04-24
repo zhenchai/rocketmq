@@ -181,6 +181,12 @@ public class MixAll {
         }
     }
 
+    /**
+     * 文件 -> String
+     * @param fileName
+     * @return
+     * @throws IOException
+     */
     public static String file2String(final String fileName) throws IOException {
         File file = new File(fileName);
         return file2String(file);

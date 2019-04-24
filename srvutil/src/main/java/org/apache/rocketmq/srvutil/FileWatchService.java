@@ -36,12 +36,25 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 public class FileWatchService extends ServiceThread {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
+    /**
+     * 文件String 以及 对应的hash值
+     */
     private final List<String> watchFiles;
     private final List<String> fileCurrentHash;
+    /**
+     * 监听器
+     */
     private final Listener listener;
+    //监听间隔
     private static final int WATCH_INTERVAL = 500;
     private MessageDigest md = MessageDigest.getInstance("MD5");
 
+    /**
+     * 文件内容变更 - 监听服务
+     * @param watchFiles
+     * @param listener
+     * @throws Exception
+     */
     public FileWatchService(final String[] watchFiles,
         final Listener listener) throws Exception {
         this.listener = listener;
@@ -61,10 +74,15 @@ public class FileWatchService extends ServiceThread {
         return "FileWatchService";
     }
 
+    /**
+     * fileWatch 监听线程启动
+     */
+    // TODO: 2019/4/23 待了解、考虑
     @Override
     public void run() {
         log.info(this.getServiceName() + " service started");
 
+        //循环处理
         while (!this.isStopped()) {
             try {
                 this.waitForRunning(WATCH_INTERVAL);

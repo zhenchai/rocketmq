@@ -46,18 +46,34 @@ public class NamesrvController {
 
     private final NettyServerConfig nettyServerConfig;
 
+    /**
+     * 单线程的线程池
+     */
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
         "NSScheduledThread"));
     private final KVConfigManager kvConfigManager;
+
+    //broker路由配置
     private final RouteInfoManager routeInfoManager;
 
     private RemotingServer remotingServer;
 
+    // TODO: 2019/4/23  broker长连接服务?
     private BrokerHousekeepingService brokerHousekeepingService;
 
+    /**
+     * netty请求的具体处理线程池
+     */
     private ExecutorService remotingExecutor;
 
+    /**
+     * rocketMQ配置信息
+     */
     private Configuration configuration;
+
+    /**
+     * 文件变动-监听服务
+     */
     private FileWatchService fileWatchService;
 
     public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
@@ -73,6 +89,15 @@ public class NamesrvController {
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
 
+    /**
+     * 初始化
+     * 1、加载 kvConfig文件
+     * 2、注册默认的请求处理类、及对应的处理线程池，nettyProcessor
+     * 3、建立调度的线程池周期执行 扫描不活跃的broker
+     * 4、建立调度的线程池周期执行 打印kv配置信息
+     * 5、
+     * @return
+     */
     public boolean initialize() {
 
         this.kvConfigManager.load();
@@ -84,6 +109,9 @@ public class NamesrvController {
 
         this.registerProcessor();
 
+        /**
+         * 固定线程，扫描 不活跃的broker
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -100,9 +128,12 @@ public class NamesrvController {
             }
         }, 1, 10, TimeUnit.MINUTES);
 
+
+        // TODO: 2019/4/23 待定
         if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
             // Register a listener to reload SslContext
             try {
+
                 fileWatchService = new FileWatchService(
                     new String[] {
                         TlsSystemConfig.tlsServerCertPath,
@@ -141,13 +172,16 @@ public class NamesrvController {
         return true;
     }
 
+    /**
+     * 注册默认的处理processor
+     */
     private void registerProcessor() {
         if (namesrvConfig.isClusterTest()) {
 
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
                 this.remotingExecutor);
         } else {
-
+            //register，其实就是将默认的处理类 及 线程池 传入处理类中
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
         }
     }
@@ -156,6 +190,7 @@ public class NamesrvController {
         this.remotingServer.start();
 
         if (this.fileWatchService != null) {
+            //启动fileWatchService、检查文件变动的线程
             this.fileWatchService.start();
         }
     }

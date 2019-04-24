@@ -33,7 +33,13 @@ public class KVConfigManager {
 
     private final NamesrvController namesrvController;
 
+    //高并发读写锁
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    /**
+     * nameSpace
+     * key
+     * value
+     */
     private final HashMap<String/* Namespace */, HashMap<String/* Key */, String/* Value */>> configTable =
         new HashMap<String, HashMap<String, String>>();
 
@@ -87,6 +93,11 @@ public class KVConfigManager {
         this.persist();
     }
 
+
+    /**
+     * KV配置-持久化
+     * 读锁
+     */
     public void persist() {
         try {
             this.lock.readLock().lockInterruptibly();
@@ -169,6 +180,9 @@ public class KVConfigManager {
         return null;
     }
 
+    /**
+     * 定期print所有 KV信息
+     */
     public void printAllPeriodically() {
         try {
             this.lock.readLock().lockInterruptibly();

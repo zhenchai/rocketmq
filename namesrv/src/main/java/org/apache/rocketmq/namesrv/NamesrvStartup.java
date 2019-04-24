@@ -41,8 +41,14 @@ import org.apache.rocketmq.srvutil.ServerUtil;
 import org.apache.rocketmq.srvutil.ShutdownHookThread;
 import org.slf4j.LoggerFactory;
 
+/**
+ * NameServer启动类
+ */
 public class NamesrvStartup {
 
+    /**
+     * RocketMQ 内部日志类
+     */
     private static InternalLogger log;
     private static Properties properties = null;
     private static CommandLine commandLine = null;
@@ -68,6 +74,14 @@ public class NamesrvStartup {
         return null;
     }
 
+    /**
+     * create Nameserver控制器
+     * 获取配置文件中nameServer、nettyServer信息，创建NameServer
+     * @param args
+     * @return
+     * @throws IOException
+     * @throws JoranException
+     */
     public static NamesrvController createNamesrvController(String[] args) throws IOException, JoranException {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
         //PackageConflictDetect.detectFastjson();
@@ -81,6 +95,7 @@ public class NamesrvStartup {
 
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+        //nettyServer的监听端口
         nettyServerConfig.setListenPort(9876);
         if (commandLine.hasOption('c')) {
             String file = commandLine.getOptionValue('c');
@@ -123,6 +138,7 @@ public class NamesrvStartup {
         MixAll.printObjectProperties(log, namesrvConfig);
         MixAll.printObjectProperties(log, nettyServerConfig);
 
+        //nameServer的config 以及 nettyServer的config
         final NamesrvController controller = new NamesrvController(namesrvConfig, nettyServerConfig);
 
         // remember all configs to prevent discard
@@ -143,6 +159,8 @@ public class NamesrvStartup {
             System.exit(-3);
         }
 
+
+        // TODO: 2019/4/23 增加shutdownHook，避免在JVM意外退出时，资源未释放的情况
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {
