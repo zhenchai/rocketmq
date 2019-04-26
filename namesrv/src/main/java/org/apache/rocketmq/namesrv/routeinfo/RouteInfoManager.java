@@ -53,6 +53,7 @@ import org.apache.rocketmq.remoting.common.RemotingUtil;
 public class RouteInfoManager {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
+    //可重入读写锁
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     /**
      * topic对应的多个Master broker
@@ -65,10 +66,18 @@ public class RouteInfoManager {
      */
     private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
     /**
-     * 多个BrokerName 组成
+     * 多个BrokerName 组成 cluster
      */
     private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
+    /**
+     * brokerAddr的info
+     * 包括长连的channel、最近更新time
+     */
     private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
+    /**
+     * 过滤server
+     * value： 与这个key(brokerAddr)关联的多个filter Server
+     */
     private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
 
     public RouteInfoManager() {
@@ -89,6 +98,7 @@ public class RouteInfoManager {
     public void deleteTopic(final String topic) {
         try {
             try {
+                //休眠时，或被中断的获取写锁方式
                 this.lock.writeLock().lockInterruptibly();
                 this.topicQueueTable.remove(topic);
             } finally {
@@ -115,6 +125,18 @@ public class RouteInfoManager {
         return topicList.encode();
     }
 
+    /**
+     * 注册Broker，broker启动后，会自动上报
+     * @param clusterName
+     * @param brokerAddr
+     * @param brokerName
+     * @param brokerId
+     * @param haServerAddr
+     * @param topicConfigWrapper
+     * @param filterServerList
+     * @param channel
+     * @return
+     */
     public RegisterBrokerResult registerBroker(
         final String clusterName,
         final String brokerAddr,
