@@ -36,6 +36,7 @@ public class ResponseFuture {
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
     private volatile RemotingCommand responseCommand;
+    //sendRequest是否OK？
     private volatile boolean sendRequestOK = true;
     private volatile Throwable cause;
 
@@ -67,14 +68,16 @@ public class ResponseFuture {
         return diff > this.timeoutMillis;
     }
 
+    // TODO: 2019/4/29 如何等待netty的response
     public RemotingCommand waitResponse(final long timeoutMillis) throws InterruptedException {
+        //countDownLatch线程等待
         this.countDownLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
         return this.responseCommand;
     }
 
     public void putResponse(final RemotingCommand responseCommand) {
         this.responseCommand = responseCommand;
-        this.countDownLatch.countDown();
+        this.countDownLatch.countDown();//唤醒waitResponse
     }
 
     public long getBeginTimestamp() {

@@ -29,6 +29,9 @@ import org.apache.rocketmq.tools.command.CommandUtil;
 import org.apache.rocketmq.tools.command.SubCommand;
 import org.apache.rocketmq.tools.command.SubCommandException;
 
+/**
+ * 创建、更新topic的相关命令类
+ */
 public class UpdateTopicSubCommand implements SubCommand {
 
     @Override
@@ -43,10 +46,11 @@ public class UpdateTopicSubCommand implements SubCommand {
 
     @Override
     public Options buildCommandlineOptions(Options options) {
+        //b参数指定在哪个Broker上创建本Topic的Message Queue
         Option opt = new Option("b", "brokerAddr", true, "create topic to which broker");
         opt.setRequired(false);
         options.addOption(opt);
-
+        //c参数指定在这个Cluster下面所有的Master Broker上创建这个Topic的Message Queue，达到高可用
         opt = new Option("c", "clusterName", true, "create topic to which cluster");
         opt.setRequired(false);
         options.addOption(opt);

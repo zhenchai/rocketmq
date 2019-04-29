@@ -162,6 +162,7 @@ public class MQClientAPIImpl {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
     }
 
+    /**远程调用Client-netty*/
     private final RemotingClient remotingClient;
     private final TopAddressing topAddressing;
     private final ClientRemotingProcessor clientRemotingProcessor;
@@ -252,6 +253,18 @@ public class MQClientAPIImpl {
 
     }
 
+    /**
+     * client发送 create topic的命令
+     * 发送对应的Broker
+     * @param addr
+     * @param defaultTopic
+     * @param topicConfig
+     * @param timeoutMillis
+     * @throws RemotingException
+     * @throws MQBrokerException
+     * @throws InterruptedException
+     * @throws MQClientException
+     */
     public void createTopic(final String addr, final String defaultTopic, final TopicConfig topicConfig,
         final long timeoutMillis)
         throws RemotingException, MQBrokerException, InterruptedException, MQClientException {

@@ -21,6 +21,11 @@ import io.netty.channel.Channel;
 public interface ChannelEventListener {
     void onChannelConnect(final String remoteAddr, final Channel channel);
 
+    /**
+     * 当nameServer 与 Broker的长连接断掉后
+     * @param remoteAddr
+     * @param channel
+     */
     void onChannelClose(final String remoteAddr, final Channel channel);
 
     void onChannelException(final String remoteAddr, final Channel channel);

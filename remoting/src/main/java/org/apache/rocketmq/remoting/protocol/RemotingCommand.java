@@ -328,6 +328,9 @@ public class RemotingCommand {
         return name;
     }
 
+    /**
+     * 通信协议-编码
+     */
     public ByteBuffer encode() {
         // 1> header length size
         int length = 4;

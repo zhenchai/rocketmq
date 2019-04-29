@@ -313,6 +313,9 @@ public class TopicConfigManager extends ConfigManager {
         }
     }
 
+    /**
+     * create or update TopicConfig
+     */
     public void updateTopicConfig(final TopicConfig topicConfig) {
         TopicConfig old = this.topicConfigTable.put(topicConfig.getTopicName(), topicConfig);
         if (old != null) {

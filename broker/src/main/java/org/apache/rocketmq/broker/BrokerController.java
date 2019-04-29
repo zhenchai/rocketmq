@@ -885,6 +885,11 @@ public class BrokerController {
         }
     }
 
+    /**
+     * 向NameServer发送 registerBroker的请求
+     * @param topicConfig
+     * @param dataVersion
+     */
     public synchronized void registerIncrementBrokerData(TopicConfig topicConfig, DataVersion dataVersion) {
         TopicConfig registerTopicConfig = topicConfig;
         if (!PermName.isWriteable(this.getBrokerConfig().getBrokerPermission())

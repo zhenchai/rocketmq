@@ -470,6 +470,11 @@ public class RouteInfoManager {
         }
     }
 
+    /**
+     * nameServer 与 broker的连接断了
+     * @param remoteAddr
+     * @param channel
+     */
     public void onChannelDestroy(String remoteAddr, Channel channel) {
         String brokerAddrFound = null;
         if (channel != null) {
@@ -499,6 +504,7 @@ public class RouteInfoManager {
             log.info("the broker's channel destroyed, {}, clean it's data structure at once", brokerAddrFound);
         }
 
+        //remove对应的brokerAddrFound
         if (brokerAddrFound != null && brokerAddrFound.length() > 0) {
 
             try {
