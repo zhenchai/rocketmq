@@ -41,7 +41,11 @@ import org.apache.rocketmq.store.schedule.ScheduleMessageService;
 
 /**
  * Store all metadata downtime for recovery, data protection reliability
+ * CommitLog以物理文件的方式存放，每台Broker上CommitLog被本机器所有ConsumerQueue共享
+ * 尽量保证CommitLog顺序写，但是随机读；
+ * 随机读，但利用操作系统的pagecache机制，可以批量从磁盘读取，作为cache存在内存中，加速后续的读取速度；
  */
+// TODO: 2019/5/16 RocketMQ基于“顺序写”“随机读”的原则来设计，利用“零拷贝”技术，克服了磁盘操作的瓶颈
 public class CommitLog {
     // Message's MAGIC CODE daa320a7
     public final static int MESSAGE_MAGIC_CODE = -626843481;

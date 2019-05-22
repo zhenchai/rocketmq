@@ -82,6 +82,11 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.remoting.netty.NettyClientConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * 客户端各种类型的Consumer和Producer的底层类
+ * 负责和Broker打交道
+ * 被多个Consumer和Producer公用
+ */
 public class MQClientInstance {
     private final static long LOCK_TIMEOUT_MILLIS = 3000;
     private final InternalLogger log = ClientLogger.getLog();
@@ -585,6 +590,9 @@ public class MQClientInstance {
         }
     }
 
+    /**
+     * 更新TopicRouteInfo
+     */
     public boolean updateTopicRouteInfoFromNameServer(final String topic, boolean isDefault,
         DefaultMQProducer defaultMQProducer) {
         try {

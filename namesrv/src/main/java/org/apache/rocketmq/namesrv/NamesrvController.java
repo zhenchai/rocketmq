@@ -129,7 +129,7 @@ public class NamesrvController {
         }, 1, 10, TimeUnit.MINUTES);
 
 
-        // TODO: 2019/4/23 待定
+        // TODO: 2019/4/23 监听tls文件
         if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
             // Register a listener to reload SslContext
             try {

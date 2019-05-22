@@ -88,6 +88,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
      * </p>
      *
      * This field defaults to clustering.
+     *
+     * clustering 与 broadcasting的区别，同一个consumerGroup
      */
     private MessageModel messageModel = MessageModel.CLUSTERING;
 
@@ -134,11 +136,15 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
     /**
      * Queue allocation algorithm specifying how message queues are allocated to each consumer clients.
+     *
+     * message queue是如何被分配到每个consumer client
+     * mq的分配策略
      */
     private AllocateMessageQueueStrategy allocateMessageQueueStrategy;
 
     /**
      * Subscription relationship
+     * key：topic，value；tag列表
      */
     private Map<String /* topic */, String /* sub expression */> subscription = new HashMap<String, String>();
 
@@ -154,6 +160,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
     /**
      * Minimum consumer thread number
+     *
+     * 消费线程num
      */
     private int consumeThreadMin = 20;
 

@@ -152,6 +152,10 @@ import org.apache.rocketmq.remoting.protocol.LanguageCode;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 
+/**
+ * 实现消息的收发
+ * 从Broker获取消息或者发送消息给Broker
+ */
 public class MQClientAPIImpl {
 
     private final static InternalLogger log = ClientLogger.getLog();
@@ -307,6 +311,9 @@ public class MQClientAPIImpl {
         return sendMessage(addr, brokerName, msg, requestHeader, timeoutMillis, communicationMode, null, null, null, 0, context, producer);
     }
 
+    /**
+     * 该方法真正发起网络请求broker
+     */
     public SendResult sendMessage(
         final String addr,
         final String brokerName,
@@ -322,6 +329,7 @@ public class MQClientAPIImpl {
         final DefaultMQProducerImpl producer
     ) throws RemotingException, MQBrokerException, InterruptedException {
         long beginStartTime = System.currentTimeMillis();
+        //1、构建 RemotingCommand请求
         RemotingCommand request = null;
         if (sendSmartMsg || msg instanceof MessageBatch) {
             SendMessageRequestHeaderV2 requestHeaderV2 = SendMessageRequestHeaderV2.createSendMessageRequestHeaderV2(requestHeader);
@@ -502,6 +510,9 @@ public class MQClientAPIImpl {
         }
     }
 
+    /**
+     * 处理返回值
+     */
     private SendResult processSendResponse(
         final String brokerName,
         final Message msg,

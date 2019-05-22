@@ -36,6 +36,10 @@ import org.apache.rocketmq.common.protocol.body.ProcessQueueInfo;
 
 /**
  * Queue consumption snapshot
+ *
+ * 从Broker获得的消息，因为是提交到线程池里并行执行，很难监控和控制执行状态，特定义个快照类
+ * 每个Message Queue都会有一个对应的ProcessQueue对象，保存了这个Message Queue消息处理状态的快照
+ *
  */
 public class ProcessQueue {
     public final static long REBALANCE_LOCK_MAX_LIVE_TIME =
@@ -43,7 +47,13 @@ public class ProcessQueue {
     public final static long REBALANCE_LOCK_INTERVAL = Long.parseLong(System.getProperty("rocketmq.client.rebalance.lockInterval", "20000"));
     private final static long PULL_MAX_IDLE_TIME = Long.parseLong(System.getProperty("rocketmq.client.pull.pullMaxIdleTime", "120000"));
     private final InternalLogger log = ClientLogger.getLog();
+    //读写锁，控制多个线程对TreeMap对象的并发访问
     private final ReadWriteLock lockTreeMap = new ReentrantReadWriteLock();
+    /**
+     * 以Message Queue的offset ：key
+     * 以消息内容的引用：value
+     * 保存了所有从MQ获取到但还未被处理的消息
+     */
     private final TreeMap<Long, MessageExt> msgTreeMap = new TreeMap<Long, MessageExt>();
     private final AtomicLong msgCount = new AtomicLong();
     private final AtomicLong msgSize = new AtomicLong();

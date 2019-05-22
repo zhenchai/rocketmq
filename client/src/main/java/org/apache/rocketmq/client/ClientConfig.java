@@ -33,6 +33,7 @@ public class ClientConfig {
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
     /**
      * Pulling topic information interval from the named server
+     * 线程周期从nameServer中获取topic信息
      */
     private int pollNameServerInterval = 1000 * 30;
     /**

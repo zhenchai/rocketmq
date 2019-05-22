@@ -77,6 +77,8 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup eventLoopGroupWorker;
     private final Lock lockChannelTables = new ReentrantLock();
+
+    /** ip对应的channel映射关系 **/
     private final ConcurrentMap<String /* addr */, ChannelWrapper> channelTables = new ConcurrentHashMap<String, ChannelWrapper>();
 
     private final Timer timer = new Timer("ClientHouseKeepingService", true);
@@ -406,6 +408,12 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    /**
+     * 获取broker地址的netty连接
+     * @param addr
+     * @return
+     * @throws InterruptedException
+     */
     private Channel getAndCreateChannel(final String addr) throws InterruptedException {
         if (null == addr) {
             return getAndCreateNameserverChannel();

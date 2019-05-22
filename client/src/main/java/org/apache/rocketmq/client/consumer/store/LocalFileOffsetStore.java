@@ -37,6 +37,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 
 /**
  * Local storage implementation
+ * model: broadcasting，offset存储在本地
  */
 public class LocalFileOffsetStore implements OffsetStore {
     public final static String LOCAL_OFFSET_STORE_DIR = System.getProperty(

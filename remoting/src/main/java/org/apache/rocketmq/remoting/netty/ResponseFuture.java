@@ -24,10 +24,15 @@ import org.apache.rocketmq.remoting.InvokeCallback;
 import org.apache.rocketmq.remoting.common.SemaphoreReleaseOnlyOnce;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * Response的Future
+ * 实现netty的异步转同步
+ */
 public class ResponseFuture {
     private final int opaque;
     private final Channel processChannel;
     private final long timeoutMillis;
+    /** 异步通信的callback **/
     private final InvokeCallback invokeCallback;
     private final long beginTimestamp = System.currentTimeMillis();
     private final CountDownLatch countDownLatch = new CountDownLatch(1);

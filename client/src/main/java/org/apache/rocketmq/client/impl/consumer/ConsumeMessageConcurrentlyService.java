@@ -48,16 +48,22 @@ import org.apache.rocketmq.common.protocol.body.CMResult;
 import org.apache.rocketmq.common.protocol.body.ConsumeMessageDirectlyResult;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 
+/**
+ * 并发处理服务
+ */
 public class ConsumeMessageConcurrentlyService implements ConsumeMessageService {
     private static final InternalLogger log = ClientLogger.getLog();
     private final DefaultMQPushConsumerImpl defaultMQPushConsumerImpl;
     private final DefaultMQPushConsumer defaultMQPushConsumer;
     private final MessageListenerConcurrently messageListener;
     private final BlockingQueue<Runnable> consumeRequestQueue;
+    /** 主线程池：正常执行收到的消息 **/
     private final ThreadPoolExecutor consumeExecutor;
     private final String consumerGroup;
 
+    /** 单线程：执行推迟消费的消息 **/
     private final ScheduledExecutorService scheduledExecutorService;
+    /** 单线程：定期清理超时消息 **/
     private final ScheduledExecutorService cleanExpireMsgExecutors;
 
     public ConsumeMessageConcurrentlyService(DefaultMQPushConsumerImpl defaultMQPushConsumerImpl,
@@ -197,6 +203,13 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         return result;
     }
 
+    /**
+     * 提交处理从broker中收到的消息
+     * @param msgs
+     * @param processQueue
+     * @param messageQueue
+     * @param dispatchToConsume
+     */
     @Override
     public void submitConsumeRequest(
         final List<MessageExt> msgs,
@@ -205,6 +218,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         final boolean dispatchToConsume) {
         final int consumeBatchSize = this.defaultMQPushConsumer.getConsumeMessageBatchMaxSize();
         if (msgs.size() <= consumeBatchSize) {
+            //消息封装
             ConsumeRequest consumeRequest = new ConsumeRequest(msgs, processQueue, messageQueue);
             try {
                 this.consumeExecutor.submit(consumeRequest);
@@ -256,6 +270,12 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         }
     }
 
+    /**
+     * 不同消息结果的处理逻辑
+     * @param status
+     * @param context
+     * @param consumeRequest
+     */
     public void processConsumeResult(
         final ConsumeConcurrentlyStatus status,
         final ConsumeConcurrentlyContext context,
@@ -401,6 +421,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
                 consumeMessageContext.setMq(messageQueue);
                 consumeMessageContext.setMsgList(msgs);
                 consumeMessageContext.setSuccess(false);
+                /** 前过滤器 **/
                 ConsumeMessageConcurrentlyService.this.defaultMQPushConsumerImpl.executeHookBefore(consumeMessageContext);
             }
 
@@ -453,6 +474,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
             if (ConsumeMessageConcurrentlyService.this.defaultMQPushConsumerImpl.hasHook()) {
                 consumeMessageContext.setStatus(status.toString());
                 consumeMessageContext.setSuccess(ConsumeConcurrentlyStatus.CONSUME_SUCCESS == status);
+                /** 后过滤器 **/
                 ConsumeMessageConcurrentlyService.this.defaultMQPushConsumerImpl.executeHookAfter(consumeMessageContext);
             }
 

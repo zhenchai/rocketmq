@@ -302,6 +302,7 @@ public abstract class NettyRemotingAbstract {
         ExecutorService executor = this.getCallbackExecutor();
         if (executor != null) {
             try {
+                // TODO: 2019/5/22 新的线程池 处理 callback逻辑 
                 executor.submit(new Runnable() {
                     @Override
                     public void run() {

@@ -24,6 +24,11 @@ import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.store.config.StorePathConfigHelper;
 
+/**
+ * RocketMQ的存储由 consumeQueue及CommitLog配合完成
+ * 消息的逻辑队列，类似数据库的索引文件，存储的是指向物理存储的地址
+ * 每个Topic下每个Message Queue都有一个对应的ConsumeQueue文件
+ */
 public class ConsumeQueue {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 

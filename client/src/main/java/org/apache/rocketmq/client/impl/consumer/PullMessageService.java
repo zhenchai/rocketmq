@@ -29,6 +29,10 @@ import org.apache.rocketmq.common.utils.ThreadUtils;
 
 public class PullMessageService extends ServiceThread {
     private final InternalLogger log = ClientLogger.getLog();
+
+    /**
+     * 无界阻塞队列
+     */
     private final LinkedBlockingQueue<PullRequest> pullRequestQueue = new LinkedBlockingQueue<PullRequest>();
     private final MQClientInstance mQClientFactory;
     private final ScheduledExecutorService scheduledExecutorService = Executors
@@ -76,6 +80,10 @@ public class PullMessageService extends ServiceThread {
         return scheduledExecutorService;
     }
 
+    /**
+     * 获取消息逻辑
+     * @param pullRequest
+     */
     private void pullMessage(final PullRequest pullRequest) {
         final MQConsumerInner consumer = this.mQClientFactory.selectConsumer(pullRequest.getConsumerGroup());
         if (consumer != null) {
@@ -86,6 +94,9 @@ public class PullMessageService extends ServiceThread {
         }
     }
 
+    /**
+     * 获取消息
+     */
     @Override
     public void run() {
         log.info(this.getServiceName() + " service started");
