@@ -159,8 +159,10 @@ public abstract class AbstractSendMessageProcessor implements NettyRequestProces
         return response;
     }
 
+    //check msg
     protected RemotingCommand msgCheck(final ChannelHandlerContext ctx,
         final SendMessageRequestHeader requestHeader, final RemotingCommand response) {
+        // 检查 broker 是否有写入权限
         if (!PermName.isWriteable(this.brokerController.getBrokerConfig().getBrokerPermission())
             && this.brokerController.getTopicConfigManager().isOrderTopic(requestHeader.getTopic())) {
             response.setCode(ResponseCode.NO_PERMISSION);
@@ -237,6 +239,7 @@ public abstract class AbstractSendMessageProcessor implements NettyRequestProces
         final RemotingCommand response) {
         if (!request.isOnewayRPC()) {
             try {
+                //response回复
                 ctx.writeAndFlush(response);
             } catch (Throwable e) {
                 log.error("SendMessageProcessor process request over, but response failed", e);

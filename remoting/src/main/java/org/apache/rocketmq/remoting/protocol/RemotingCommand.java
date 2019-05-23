@@ -234,6 +234,7 @@ public class RemotingCommand {
         this.customHeader = customHeader;
     }
 
+    /** 解码 **/
     public CommandCustomHeader decodeCommandCustomHeader(
         Class<? extends CommandCustomHeader> classHeader) throws RemotingCommandException {
         CommandCustomHeader objectHeader;
