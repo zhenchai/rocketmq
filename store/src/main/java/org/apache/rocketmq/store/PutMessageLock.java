@@ -18,6 +18,9 @@ package org.apache.rocketmq.store;
 
 /**
  * Used when trying to put message
+ *
+ * 自旋锁
+ * 阻塞锁
  */
 public interface PutMessageLock {
     void lock();

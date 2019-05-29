@@ -29,6 +29,10 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+/**
+ * CommitLog : MappedFileQueue : MappedFile = 1 : 1 : N。
+ * MappedFile所在的文件夹，对MappedFile进行封装成文件队列，对上层提供无限使用的文件容量
+ */
 public class MappedFileQueue {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     private static final InternalLogger LOG_ERROR = InternalLoggerFactory.getLogger(LoggerName.STORE_ERROR_LOGGER_NAME);
@@ -196,6 +200,7 @@ public class MappedFileQueue {
         MappedFile mappedFileLast = getLastMappedFile();
 
         if (mappedFileLast == null) {
+            // 一个映射文件都不存在
             createOffset = startOffset - (startOffset % this.mappedFileSize);
         }
 
@@ -203,6 +208,7 @@ public class MappedFileQueue {
             createOffset = mappedFileLast.getFileFromOffset() + this.mappedFileSize;
         }
 
+        // 创建文件
         if (createOffset != -1 && needCreate) {
             String nextFilePath = this.storePath + File.separator + UtilAll.offset2FileName(createOffset);
             String nextNextFilePath = this.storePath + File.separator
@@ -237,6 +243,7 @@ public class MappedFileQueue {
         return getLastMappedFile(startOffset, true);
     }
 
+    //获取尾部的mappedFile
     public MappedFile getLastMappedFile() {
         MappedFile mappedFileLast = null;
 
@@ -422,6 +429,10 @@ public class MappedFileQueue {
         return deleteCount;
     }
 
+    /**
+     * 最终的刷盘入口
+     * @param flushLeastPages flush最小页数
+     */
     public boolean flush(final int flushLeastPages) {
         boolean result = true;
         MappedFile mappedFile = this.findMappedFileByOffset(this.flushedWhere, this.flushedWhere == 0);
