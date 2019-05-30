@@ -78,16 +78,31 @@ public class DefaultMessageStore implements MessageStore {
 
     private final CleanConsumeQueueService cleanConsumeQueueService;
 
+    /**
+     * 索引文件服务线程
+     */
     private final IndexService indexService;
 
+    /**
+     * MappedFile预分配服务线程
+     */
     private final AllocateMappedFileService allocateMappedFileService;
 
+    /**
+     * 回放存储消息服务线程-将msg的offset信息塞入consumeQueue
+     */
     private final ReputMessageService reputMessageService;
 
+    /**
+     * Broker主从同步高可用服务线程
+     */
     private final HAService haService;
 
     private final ScheduleMessageService scheduleMessageService;
 
+    /**
+     * 消息存储统计服务线程
+     */
     private final StoreStatsService storeStatsService;
 
     private final TransientStorePool transientStorePool;

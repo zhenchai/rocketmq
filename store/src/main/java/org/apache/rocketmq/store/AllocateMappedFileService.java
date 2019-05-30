@@ -33,6 +33,7 @@ import org.apache.rocketmq.store.config.BrokerRole;
 
 /**
  * Create MappedFile in advance
+ * 预先分配MappedFile
  */
 public class AllocateMappedFileService extends ServiceThread {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
@@ -51,6 +52,10 @@ public class AllocateMappedFileService extends ServiceThread {
         this.messageStore = messageStore;
     }
 
+    /**
+     * add mappedFile to requestTable
+     * 该类有线程，不停地run，当requestTable有 创建file 的请求则进行映射文件的分配，创建
+     */
     public MappedFile putRequestAndReturnMappedFile(String nextFilePath, String nextNextFilePath, int fileSize) {
         int canSubmitRequests = 2;
         if (this.messageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
@@ -177,6 +182,11 @@ public class AllocateMappedFileService extends ServiceThread {
                 long beginTime = System.currentTimeMillis();
 
                 MappedFile mappedFile;
+                /**
+                 * mappedFile分配的两种策略
+                 * 1.从TransientStorePool堆外内存池中获取相应的DirectByteBuffer来构建MappedFile
+                 * 2.使用Mmap的方式来构建MappedFile实例
+                 */
                 if (messageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
                     try {
                         mappedFile = ServiceLoader.load(MappedFile.class).iterator().next();

@@ -68,7 +68,12 @@ public class MappedFile extends ReferenceResource {
     private File file;
     /**
      * 一个用来映射文件到进程地址空间
+     * 该内存属于 堆外内存，不能被GC，只能通过手动释放
+     *
+     * 卸载这部分内存空间需要通过系统调用 unmap()方法来实现。然而unmap()方法是FileChannelImpl类里实现的私有方法，无法直接显示调用。
+     * rocketMQ采用的方式：通过Java反射的方式调用“sun.misc”包下的Cleaner类的clean()方法来释放映射占用的内存空间
      */
+    // TODO: 2019/5/30 mappedByteBuffer堆外内存的申请、使用、释放？重点
     private MappedByteBuffer mappedByteBuffer;
     private volatile long storeTimestamp = 0;
     private boolean firstCreateInQueue = false;
@@ -95,6 +100,9 @@ public class MappedFile extends ReferenceResource {
         }
     }
 
+    /**
+     * 通过Java反射的方式调用“sun.misc”包下的Cleaner类的clean()方法来释放映射占用的内存空间
+     */
     public static void clean(final ByteBuffer buffer) {
         if (buffer == null || !buffer.isDirect() || buffer.capacity() == 0)
             return;
