@@ -28,7 +28,7 @@ import org.apache.rocketmq.store.config.StorePathConfigHelper;
  * RocketMQ的存储由 consumeQueue及CommitLog配合完成
  * 消息的逻辑队列，类似数据库的索引文件，存储的是指向物理存储的地址
  * 每个Topic下每个Message Queue都有一个对应的ConsumeQueue文件
- * ConsumeQueue 对应 consumer
+ * ConsumeQueue 对接 consumer
  */
 public class ConsumeQueue {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
@@ -41,6 +41,12 @@ public class ConsumeQueue {
     private final MappedFileQueue mappedFileQueue;
     private final String topic;
     private final int queueId;
+    /**
+     * put下面的信息
+     * offset
+     * size
+     * tagsCode
+     */
     private final ByteBuffer byteBufferIndex;
 
     private final String storePath;
@@ -326,6 +332,9 @@ public class ConsumeQueue {
         return lastOffset;
     }
 
+    /**
+     * flush
+     */
     public boolean flush(final int flushLeastPages) {
         boolean result = this.mappedFileQueue.flush(flushLeastPages);
         if (isExtReadEnable()) {
@@ -381,9 +390,14 @@ public class ConsumeQueue {
         return this.minLogicOffset / CQ_STORE_UNIT_SIZE;
     }
 
+
+    /**
+     * put 消息的位置信息
+     */
     public void putMessagePositionInfoWrapper(DispatchRequest request) {
         final int maxRetries = 30;
         boolean canWrite = this.defaultMessageStore.getRunningFlags().isCQWriteable();
+        // 多次重试
         for (int i = 0; i < maxRetries && canWrite; i++) {
             long tagsCode = request.getTagsCode();
             if (isExtWriteEnable()) {
@@ -400,9 +414,12 @@ public class ConsumeQueue {
                         topic, queueId, request.getCommitLogOffset());
                 }
             }
+
+            //添加 位置info
             boolean result = this.putMessagePositionInfo(request.getCommitLogOffset(),
                 request.getMsgSize(), tagsCode, request.getConsumeQueueOffset());
             if (result) {
+                //添加成功，使用消息存储时间 作为 存储check point
                 this.defaultMessageStore.getStoreCheckpoint().setLogicsMsgTimestamp(request.getStoreTimestamp());
                 return;
             } else {
@@ -423,6 +440,9 @@ public class ConsumeQueue {
         this.defaultMessageStore.getRunningFlags().makeLogicsQueueError();
     }
 
+    /**
+     * put消息的位置info
+     */
     private boolean putMessagePositionInfo(final long offset, final int size, final long tagsCode,
         final long cqOffset) {
 

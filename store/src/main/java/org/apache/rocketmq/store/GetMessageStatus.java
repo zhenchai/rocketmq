@@ -26,7 +26,7 @@ public enum GetMessageStatus {
 
     OFFSET_FOUND_NULL,
 
-    OFFSET_OVERFLOW_BADLY,
+    OFFSET_OVERFLOW_BADLY ,
 
     OFFSET_OVERFLOW_ONE,
 
