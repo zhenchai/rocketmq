@@ -39,6 +39,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 /**
  * Remote storage implementation
  * model：clustering，offset存在broker机器上
+ * Consumer消费进度管理，负责从Broker获取消费进度，同步消费进度到Broker
  */
 public class RemoteBrokerOffsetStore implements OffsetStore {
     private final static InternalLogger log = ClientLogger.getLog();

@@ -23,6 +23,9 @@ public class TopicConfig {
     public static int defaultReadQueueNums = 16;
     public static int defaultWriteQueueNums = 16;
     private String topicName;
+    /**
+     * 拉取数据的队列数，读取哪一个id，由consumer-client控制
+     */
     private int readQueueNums = defaultReadQueueNums;
     private int writeQueueNums = defaultWriteQueueNums;
     private int perm = PermName.PERM_READ | PermName.PERM_WRITE;

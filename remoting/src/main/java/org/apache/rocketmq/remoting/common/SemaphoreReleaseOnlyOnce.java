@@ -29,6 +29,7 @@ public class SemaphoreReleaseOnlyOnce {
 
     public void release() {
         if (this.semaphore != null) {
+            //并发控制release
             if (this.released.compareAndSet(false, true)) {
                 this.semaphore.release();
             }

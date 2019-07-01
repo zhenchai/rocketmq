@@ -218,6 +218,10 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * 均衡消息队列
+     * @param isOrder
+     */
     public void doRebalance(final boolean isOrder) {
         Map<String, SubscriptionData> subTable = this.getSubscriptionInner();
         if (subTable != null) {
@@ -240,6 +244,11 @@ public abstract class RebalanceImpl {
         return subscriptionInner;
     }
 
+    /**
+     * 均衡指定topic
+     * @param topic
+     * @param isOrder
+     */
     private void rebalanceByTopic(final String topic, final boolean isOrder) {
         switch (messageModel) {
             case BROADCASTING: {
