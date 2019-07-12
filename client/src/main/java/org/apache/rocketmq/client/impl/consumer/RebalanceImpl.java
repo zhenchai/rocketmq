@@ -45,6 +45,7 @@ import org.apache.rocketmq.common.protocol.heartbeat.SubscriptionData;
  */
 public abstract class RebalanceImpl {
     protected static final InternalLogger log = ClientLogger.getLog();
+    /** MQ -> PQ **/
     protected final ConcurrentMap<MessageQueue, ProcessQueue> processQueueTable = new ConcurrentHashMap<MessageQueue, ProcessQueue>(64);
     protected final ConcurrentMap<String/* topic */, Set<MessageQueue>> topicSubscribeInfoTable =
         new ConcurrentHashMap<String, Set<MessageQueue>>();
@@ -219,10 +220,11 @@ public abstract class RebalanceImpl {
     }
 
     /**
-     * 均衡消息队列
+     * 均衡分配消息队列
      * @param isOrder
      */
     public void doRebalance(final boolean isOrder) {
+        // 分配每个 topic 的消息队列
         Map<String, SubscriptionData> subTable = this.getSubscriptionInner();
         if (subTable != null) {
             for (final Map.Entry<String, SubscriptionData> entry : subTable.entrySet()) {
@@ -237,6 +239,7 @@ public abstract class RebalanceImpl {
             }
         }
 
+        // 移除未订阅的topic对应的消息队列
         this.truncateMessageQueueNotMyTopic();
     }
 
@@ -252,6 +255,7 @@ public abstract class RebalanceImpl {
     private void rebalanceByTopic(final String topic, final boolean isOrder) {
         switch (messageModel) {
             case BROADCASTING: {
+                //广播模式下，分配topic所有的消息队列
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
                 if (mqSet != null) {
                     boolean changed = this.updateProcessQueueTableInRebalance(topic, mqSet, isOrder);
@@ -269,6 +273,7 @@ public abstract class RebalanceImpl {
                 break;
             }
             case CLUSTERING: {
+                //集群模式下，分配topic部分的消息队列
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
                 List<String> cidAll = this.mQClientFactory.findConsumerIdList(topic, consumerGroup);
                 if (null == mqSet) {
@@ -324,6 +329,9 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * 删除processQueueTable中未分配的topic
+     */
     private void truncateMessageQueueNotMyTopic() {
         Map<String, SubscriptionData> subTable = this.getSubscriptionInner();
 
@@ -339,6 +347,11 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * 当负载均衡时，更新 消息处理队列
+     * - 移除 在processQueueTable && 不存在于 mqSet 里的消息队列
+     * - 增加 不在processQueueTable && 存在于mqSet 里的消息队列
+     */
     private boolean updateProcessQueueTableInRebalance(final String topic, final Set<MessageQueue> mqSet,
         final boolean isOrder) {
         boolean changed = false;
@@ -422,6 +435,9 @@ public abstract class RebalanceImpl {
 
     public abstract void removeDirtyOffset(final MessageQueue mq);
 
+    /**
+     * 计算mq的拉取进度
+     */
     public abstract long computePullFromWhere(final MessageQueue mq);
 
     public abstract void dispatchPullRequest(final List<PullRequest> pullRequestList);

@@ -40,6 +40,7 @@ import org.apache.rocketmq.common.protocol.body.ProcessQueueInfo;
  * 从Broker获得的消息，因为是提交到线程池里并行执行，很难监控和控制执行状态，特定义个快照类
  * 每个Message Queue都会有一个对应的ProcessQueue对象，保存了这个Message Queue消息处理状态的快照
  *
+ * 消息处理队列
  */
 public class ProcessQueue {
     public final static long REBALANCE_LOCK_MAX_LIVE_TIME =
@@ -140,6 +141,7 @@ public class ProcessQueue {
             try {
                 int validMsgCnt = 0;
                 for (MessageExt msg : msgs) {
+                    //msgTreeMap：保存了 从consumer中获取的，但consumer未消费的msg
                     MessageExt old = msgTreeMap.put(msg.getQueueOffset(), msg);
                     if (null == old) {
                         validMsgCnt++;

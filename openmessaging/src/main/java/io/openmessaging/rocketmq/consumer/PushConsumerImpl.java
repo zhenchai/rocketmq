@@ -161,6 +161,9 @@ public class PushConsumerImpl implements PushConsumer {
         this.started = false;
     }
 
+    /**
+     * 实际的消息处理
+     */
     class MessageListenerImpl implements MessageListenerConcurrently {
 
         @Override
